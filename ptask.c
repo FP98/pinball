@@ -11,8 +11,7 @@ int task_create(void* (*task)(void*), int i, int period, int dline, int prio)  /
     pthread_attr_t myatt;
     struct sched_param mypar;
     int tret;
-    if (i >= MAX_TASKS)
-        return -1;                                                                                        
+    if (i >= MAX_TASKS) return -1;                                                                                        
 
     tp[i].arg = i;
     tp[i].period = period;
@@ -20,7 +19,6 @@ int task_create(void* (*task)(void*), int i, int period, int dline, int prio)  /
     tp[i].prio = prio;
     tp[i].dmiss = 0;
    
-
     pthread_attr_init(&myatt);
     pthread_attr_setinheritsched(&myatt, PTHREAD_EXPLICIT_SCHED);
     pthread_attr_setschedpolicy(&myatt, SCHED_FIFO);
@@ -72,7 +70,7 @@ void periodic_task_init(int i)
 void dmiss_counter(int i)
 {
 	clock_gettime(CLOCK_MONOTONIC, &(tp[i].now));
-    if (time_cmp(tp[i].now, tp[i].dl) > 0) tp[i].dmiss++;
+	if (time_cmp(tp[i].now, tp[i].dl) > 0) tp[i].dmiss++;
 }
 
 
