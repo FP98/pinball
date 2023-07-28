@@ -2,18 +2,18 @@
 #define PTASK_H
 #include <pthread.h>
 #include <time.h>
-#define MAX_TASKS 23		//3 task + MAX_BALLS
+#define MAX_TASKS 23		     //3 task + MAX_BALLS
  
 struct task_par {         	//Array di strutture parametri task
-    int arg;				//task index
-    int period;             //periodo [ms]
-    int dline;				//deadline relativa [ms]	
-    int prio;				//priorita' (0-99)
-    int dmiss;             	//numero di deadline miss
-    pthread_t tid;         	//thread id
-    struct timespec at;  	//activation time corrente
+    int arg;				           //task index
+    int period;            //periodo [ms]
+    int dline;				         //deadline relativa [ms]	
+    int prio;				          //priorita' (0-99)
+    int dmiss;             //numero di deadline miss
+    pthread_t tid;         //thread id
+    struct timespec at;  	 //activation time corrente
     struct timespec dl;   	//dead line assoluta
-    struct timespec now; 	//tempo di fine task corrente
+    struct timespec now; 	 //tempo di fine task corrente
 };
 struct task_par tp[MAX_TASKS];
 
