@@ -6,97 +6,97 @@
 #include <math.h>
 #include <stdlib.h>
 #include "ptask.h"
-#define MAX_BALLS			20		
+#define MAX_BALLS		20		
 #define SCALEFACTOR_TIME	8
 #define SCREEN_COLOR		198
 #define COMMAND_COLOR		0
 #define SCREEN_WIDTH		1024
 #define SCREEN_HEIGHT		768
 #define LINE_TICKNESS		2
-#define LINE_COLOR			9 
+#define LINE_COLOR		9 
 #define LETTER_COLOR		11
-#define X1					XBOX + 100
-#define X2					180
-#define X3					50
-#define Y1					200													//posizione verticale casella comandi
-#define Y2					Y1/4												//spaziamento fra una casella di testo e l altra
-#define XBOX				450													//dimensioni spazio in cui rimbalza la pallina
-#define YBOX				767
-#define XB					95													//dimensioni pavimento
-#define TETA				M_PI/4												//angolo pavimento [rad]
-#define YINF				150
-#define YSUP				( YINF + XB*tan(TETA) )								//altezza piano inclinato
-#define YF					( YINF + PADDLE_LENGHT*sin(LPADDLE_DOWN) - 5 )		//posizione di fine gioco							
+#define X1			XBOX + 100
+#define X2			180
+#define X3			50
+#define Y1			200							//posizione verticale casella comandi
+#define Y2			Y1/4							//spaziamento fra una casella di testo e l altra
+#define XBOX			450							//dimensioni spazio in cui rimbalza la pallina
+#define YBOX			767
+#define XB			95							//dimensioni pavimento
+#define TETA			M_PI/4							//angolo pavimento [rad]
+#define YINF			150
+#define YSUP			( YINF + XB*tan(TETA) )					//altezza piano inclinato
+#define YF			( YINF + PADDLE_LENGHT*sin(LPADDLE_DOWN) - 5 )		//posizione di fine gioco							
 #define POLYGON_COLOR		3		
 
-#define BALL_RADIUS			10
-#define BALL_COLOR_I		15													//colore iniziale pallina
+#define BALL_RADIUS		10
+#define BALL_COLOR_I		15							//colore iniziale pallina
 
-#define GRAVITY				9.8													//accelerazione di gravita' [m/s2]
-#define DAMPER				0.9
-#define AMPL				1.1
-#define SPEED_LIMIT			130													//limite di velocità
-#define VDX					5													// decremento di velocità lungo x
-#define VDY					5													//decremento di velocità lungo y					
+#define GRAVITY			9.8							//accelerazione di gravita' [m/s2]
+#define DAMPER			0.9
+#define AMPL			1.1
+#define SPEED_LIMIT		130							//limite di velocità
+#define VDX			5							// decremento di velocità lungo x
+#define VDY			5							//decremento di velocità lungo y					
 
-#define XI					300													//condizioni iniziali da cui far partire la pallina			
-#define YI					700
-#define VXI					-25													//[m/s]
+#define XI			300							//condizioni iniziali da cui far partire la pallina			
+#define YI			700
+#define VXI			-25							//[m/s]
 
 #define PADDLE_LENGHT		110
 #define PADDLE_TICKNESS		30
 #define PADDLE_TIP_RADIUS	5
-#define PADDLE_VEL			0.8													//[rad/s]
+#define PADDLE_VEL		0.8							//[rad/s]
 #define PADDLE_COLOR		51
 
-#define LPADDLE_DOWN		-M_PI/6												//inclinazione paddle sinistro a riposo
-#define LPADDLE_UP			M_PI/9												//inclinazione massima paddle sinistro alzato
+#define LPADDLE_DOWN		-M_PI/6							//inclinazione paddle sinistro a riposo
+#define LPADDLE_UP		M_PI/9							//inclinazione massima paddle sinistro alzato
 
-#define RPADDLE_DOWN		M_PI/6												//inclinazione paddle destro a riposo
-#define RPADDLE_UP			-M_PI/9												//inclinazione massima paddle destro alzato
+#define RPADDLE_DOWN		M_PI/6							//inclinazione paddle destro a riposo
+#define RPADDLE_UP		-M_PI/9							//inclinazione massima paddle destro alzato
 
-#define XR1					XBOX/2												//posizioni repulsori circolari
-#define YR1					500
-#define R1_RADIUS			35
+#define XR1			XBOX/2							//posizioni repulsori circolari
+#define YR1			500
+#define R1_RADIUS		35
 
-#define XR2					XBOX/3
-#define YR2					600
-#define R2_RADIUS			35
+#define XR2			XBOX/3
+#define YR2			600
+#define R2_RADIUS		35
 
 #define REPULSORS_COLOR		11
 
-#define XS					100													//posizioni repulsori lineari
-#define YS					350
-#define LS					70													//lunghezza repulsore lineare
-#define TS					20													//spessore repulsore lineare
-#define TETA_S				M_PI/6
-#define S_COLOR				11 
+#define XS			100							//posizioni repulsori lineari
+#define YS			350
+#define LS			70							//lunghezza repulsore lineare
+#define TS			20							//spessore repulsore lineare
+#define TETA_S			M_PI/6
+#define S_COLOR			11 
 
 //task_b Parameters----BALL-------
-#define taskB_index			0             
+#define taskB_index		0             
 #define taskB_period		15
 #define taskB_rdline		15
-#define taskB_prio			30
+#define taskB_prio		30
 
 //task_p Parameters----PADDLE-------
-#define taskP_index			MAX_BALLS 
+#define taskP_index		MAX_BALLS 
 #define taskP_period		20
 #define taskP_rdline		20
-#define taskP_prio			25
+#define taskP_prio		25
 
 
 //task_g Parameters----GRAPHICS-------
-#define taskG_index			MAX_BALLS + 1 
+#define taskG_index		MAX_BALLS + 1 
 #define taskG_period		20
 #define taskG_rdline		20
-#define taskG_prio			20
+#define taskG_prio		20
 
 
 //task_t Parameters----TASTIERA-------
-#define taskT_index			MAX_BALLS + 2                
+#define taskT_index		MAX_BALLS + 2                
 #define taskT_period		120
 #define taskT_rdline		120
-#define taskT_prio			15
+#define taskT_prio		15
 //Dichiarazione variabili globali---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 struct ball_status {                          
@@ -104,23 +104,23 @@ struct ball_status {
 	float	y;
 	float	vx;
 	float	vy;
-	float	r;							//raggio pallina
-	int	bc;								//bounce counter
-	int	color;							//ball color
+	float	r;			//raggio pallina
+	int	bc;			//bounce counter
+	int	color;			//ball color
 }; 
 struct paddle_status {                          
-	float xp;							//posizione lungo x fulcro paddle
-	float yp;							//posizione lungo y fulcro paddle
-	float tetap;						//angolo di inclinazione paddle
-	float omegap;						//velocita' angolare paddle
-	float l;							//lunghezza paddle
-	float t;							//spessore paddle
+	float xp;			//posizione lungo x fulcro paddle
+	float yp;			//posizione lungo y fulcro paddle
+	float tetap;			//angolo di inclinazione paddle
+	float omegap;			//velocita' angolare paddle
+	float l;			//lunghezza paddle
+	float t;			//spessore paddle
 }; 
 struct ball_status bs[MAX_BALLS];
-struct paddle_status lps;				//stato paddle sinistro(left)
-struct paddle_status rps;				//stato paddle destro(right)
+struct paddle_status lps;		//stato paddle sinistro(left)
+struct paddle_status rps;		//stato paddle destro(right)
 
-int nb = 0;								//numero palline in gioco  
+int nb = 0;				//numero palline in gioco  
 //-------------------------------------------------------------------------------------------------------------------
 //DICHIARAZIONE FUNZIONI AUSILIARIE DA UTILIZZARE NEI TASK-----------------------------------------------------------
 
@@ -242,10 +242,10 @@ float dist_pr(float xp, float yp, float xr, float yr)
 //-----------------------------------------------------------------------------------
 void coll_point(float xp, float yp, float teta, float q, int i)
 {
-	float m = tan(teta);												//coefficiente angolare
+	float m = tan(teta);							//coefficiente angolare
 	float xh = (bs[i].y + bs[i].x/tan(teta) - q)/(m + 1/tan(teta));		//punto lungo x da cui passa la retta
-	float yh = m*xh +q;													//punto lungo y da cui passa la retta
-	bs[i].x = xh - bs[i].r*sin(teta);									//calcolo centro della pallina corretto post collisione
+	float yh = m*xh +q;							//punto lungo y da cui passa la retta
+	bs[i].x = xh - bs[i].r*sin(teta);					//calcolo centro della pallina corretto post collisione
 	bs[i].y = yh + bs[i].r*cos(teta);  
 }
 
@@ -290,9 +290,9 @@ void bounce_vel(float teta, int i)
 	float vn, vt;
 	
 	vn =  DAMPER*( bs[i].vx*sin(teta) + fabs(bs[i].vy)*cos(teta) );		//velocita' normale a piano su cui avviene collisione
-	vt = bs[i].vx*cos(teta) - fabs(bs[i].vy)*sin(teta);					//velocita' tangenziale a piano su cui avviene collisione
+	vt = bs[i].vx*cos(teta) - fabs(bs[i].vy)*sin(teta);			//velocita' tangenziale a piano su cui avviene collisione
 	
-	bs[i].vx = vt*cos(teta) - fabs(vn)*sin(teta);						//velocita' palla post collisione
+	bs[i].vx = vt*cos(teta) - fabs(vn)*sin(teta);				//velocita' palla post collisione
 	bs[i].vy = vt*sin(teta) + fabs(vn)*cos(teta);
 }
 
@@ -814,7 +814,7 @@ void key_paddle(float dt)
 {
 	if (!key[KEY_LEFT]){
 		
-		lps.tetap = LPADDLE_DOWN;								//se non viene premuta la freccia sinistra, il paddle sinistro rimane in condizione di riposo
+		lps.tetap = LPADDLE_DOWN;				//se non viene premuta la freccia sinistra, il paddle sinistro rimane in condizione di riposo
     	lps.omegap = 0;
     }
     
@@ -855,13 +855,13 @@ void key_paddle(float dt)
 void key_T(void)
 {
 	int k;
-	if ( (key[KEY_SPACE] ) && (nb < MAX_BALLS) ){							//se premo il tasto SPACE e non sono ancora al numero massimo di palline, aggiungo ulteriore pallina
+	if ( (key[KEY_SPACE] ) && (nb < MAX_BALLS) ){		//se premo il tasto SPACE e non sono ancora al numero massimo di palline, aggiungo ulteriore pallina
 
 		task_create(taskB, nb, taskB_period, taskB_rdline, taskB_prio);
 		nb++;
 	}
 
-	if (key[KEY_B]){													//se premo B palline diventano bianche
+	if (key[KEY_B]){					//se premo B palline diventano bianche
 		
 		for ( k = 0; k < MAX_BALLS; k++ ) {
 			
@@ -912,9 +912,9 @@ void* taskB(void* arg)
 	periodic_task_init(i);
     while ( (bs[i].y + bs[i].r >= YF) && (!key[KEY_ESC]) ) {
     	
-		bs[i].x += bs[i].vx * dt;							//Aggiornamento lungo x della posizione della pallina 
+		bs[i].x += bs[i].vx * dt;					//Aggiornamento lungo x della posizione della pallina 
 		bs[i].y += -0.5*g*dt*dt + bs[i].vy*dt;				//Aggiornamento lungo y della posizione della pallina 
-		bs[i].vy += -g*dt;  								//Aggiornamento della vy 
+		bs[i].vy += -g*dt;  						//Aggiornamento della vy 
 		handle_bounce(XBOX, YBOX, i);						
 		handle_bounce_r(XR1, YR1, R1_RADIUS, i);			
 		handle_bounce_r(XR2, YR2, R2_RADIUS, i);			
